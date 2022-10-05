@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 #define STACKSIZE 500
@@ -8,16 +9,20 @@ char STACK[STACKSIZE];
 char glc[40][20];   //[<linhas>][<armazenamento por linha>]
 char input[40][20]; //[<linhas>][<armazenamento por linha>]
 
+int readINPUT(FILE *file_IN); // Retorna quantidade de linhas de entradas
 void readGLC(FILE *file_GLC);
 void push(char value);
 void pop();
+void error();
+void Q0(int i);
+void Q1(int i);
 
 void main()
 {
     FILE *file_GLC;
     FILE *file_IN;
     char *result;
-
+    int qtd_entries;
     // Abre um arquivo TEXTO para LEITURA
     file_GLC = fopen("GLC-file.txt", "rt");
     file_IN = fopen("input_file.txt", "rt");
@@ -28,8 +33,11 @@ void main()
     }
 
     readGLC(file_GLC);
-    readINPUT(file_IN);
+    qtd_entries = readINPUT(file_IN);
 
+    automato();
+
+    printf("%s", glc[0]);
     fclose(file_GLC);
 }
 
@@ -43,6 +51,32 @@ void pop()
 {
     STACK[STACK_TOP] = '\0';
     STACK_TOP--;
+}
+
+void automato(int i)
+{
+
+    int result;
+
+ACCEPT:
+    printf("Accept : %s ", line);
+    printf("\n\n\n");
+    goto END;
+ERROR:
+    printf("Reject : %s ", line);
+    printf("\n\n\n");
+    goto END;
+
+END:
+};
+void Q0(int i)
+{
+    if (STACK_TOP == -1)
+        printf("");
+    else
+    {
+        printf("O ");
+    }
 }
 
 void readGLC(FILE *file_GLC)
@@ -86,7 +120,7 @@ void readGLC(FILE *file_GLC)
     return glc;
 }
 
-void readINPUT(FILE *file_IN)
+int readINPUT(FILE *file_IN)
 {
     char read_char;
     int i = 0, j = 0;
@@ -105,4 +139,5 @@ void readINPUT(FILE *file_IN)
         input[i][j] = read_char;
         j++;
     }
+    return i + 1;
 }

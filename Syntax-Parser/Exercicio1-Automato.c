@@ -26,7 +26,7 @@ void automato(char *line)
     result = Q0(line);
 
     if (result == 1)
-        printf("Accept : %s ", line);
+        printf("Accept : %c ", line[0]);
     else if (result == 0)
         printf("Reject : %s ", line);
 
