@@ -10,19 +10,21 @@ char glc[40][20];         //[<linhas>][<armazenamento por linha>]
 char lines_input[40][20]; //[<linhas>][<armazenamento por linha>]
 
 int readINPUT(FILE *file_IN); // Retorna quantidade de linhas de entradas
-void readGLC(FILE *file_GLC);
+int readGLC(FILE *file_GLC);
+void automato(char *in);
 void push(char value);
 void pop();
 void error();
 void Q0(int i);
 void Q1(int i);
 
-void main()
+int main()
 {
     FILE *file_GLC;
     FILE *file_IN;
-    char *result;
+    // char *result;
     int qtd_entries;
+    int qtd_lineGLC;
     // Abre um arquivo TEXTO para LEITURA
     file_GLC = fopen("GLC-file.txt", "rt");
     file_IN = fopen("input_file.txt", "rt");
@@ -32,16 +34,19 @@ void main()
         return;
     }
 
-    readGLC(file_GLC);
+    qtd_lineGLC = readGLC(file_GLC);
     qtd_entries = readINPUT(file_IN);
 
-    for (int i = 0; i < qtd_entries; i++)
+    printGLC(qtd_lineGLC);
+
+    printf()
+
+        for (int i = 0; i < qtd_entries; i++)
     {
         automato(lines_input[i]);
     }
-
-    printf("%s", glc[0]);
-    fclose(file_GLC);
+    qtd_lineGLC
+        fclose(file_GLC);
 }
 
 void push(char value)
@@ -56,21 +61,28 @@ void pop()
     STACK_TOP--;
 }
 
-void automato(char in[])
+void automato(char *in)
 {
-    prinft("%c", in[0]);
-};
-void Q0(int i)
-{
-
-    printf("");
+Q0:
+    if (STACK_TOP == -1)
+        printf("");
     else
-    {
-        printf("O ");
-    }
-}
+        goto ERROR;
+Q1:
 
-void readGLC(FILE *file_GLC)
+ACCEPT:
+    printf("Accept : %s ", line);
+    printf("\n\n\n");
+    goto END;
+ERROR:
+    printf("Reject : %s ", line);
+    printf("\n\n\n");
+    goto END;
+
+END:
+};
+
+int readGLC(FILE *file_GLC)
 {
     int virgulini1 = 0;
     int virgulini2 = 0;
@@ -108,7 +120,7 @@ void readGLC(FILE *file_GLC)
         glc[i][j] = read_char;
         j++;
     }
-    return glc;
+    return i + 1;
 }
 
 int readINPUT(FILE *file_IN)
@@ -131,4 +143,8 @@ int readINPUT(FILE *file_IN)
         j++;
     }
     return i + 1;
+}
+
+void printGLC(int)
+{
 }
