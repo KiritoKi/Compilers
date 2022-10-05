@@ -33,7 +33,7 @@ void automato(char *line)
     printf("\n\n\n");
 }
 
-void main()
+void main(int argc, char *argv[])
 {
     FILE *archive;
     char line[100];
