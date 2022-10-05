@@ -2,7 +2,14 @@
 #include <stdlib.h>
 #include <string.h>
 
+// Delimitador para ler a linha do arquivo
+//(deve conter no final da cada linha até da ultima DEFAULT = enter)
+
+//----------------------->>Favor usar '_' no lugar de 'ε'<<------------------------
+//------>>ATENÇÃO NO DELIMITER DE LINHA, DEVE EXISTIR NO FINAL DA LINHA NOS ARQUIVOS<<------------------------
+
 #define STACKSIZE 500
+#define DELIMITER '\n'
 
 int STACK_TOP = -1;
 char STACK[STACKSIZE];
@@ -11,12 +18,10 @@ char lines_input[40][20]; //[<linhas>][<armazenamento por linha>]
 
 int readINPUT(FILE *file_IN); // Retorna quantidade de linhas de entradas
 int readGLC(FILE *file_GLC);
-void automato(char *in);
+void printGLC(int qtd_line);
+int automato(char *in);
 void push(char value);
 void pop();
-void error();
-void Q0(int i);
-void Q1(int i);
 
 int main()
 {
@@ -25,6 +30,7 @@ int main()
     // char *result;
     int qtd_entries;
     int qtd_lineGLC;
+    int result; // Armazena 1 se aceitou e 0 se Rejeitou
     // Abre um arquivo TEXTO para LEITURA
     file_GLC = fopen("GLC-file.txt", "rt");
     file_IN = fopen("input_file.txt", "rt");
@@ -39,14 +45,19 @@ int main()
 
     printGLC(qtd_lineGLC);
 
-    printf()
-
-        for (int i = 0; i < qtd_entries; i++)
+    for (int i = 0; i < qtd_entries; i++)
     {
-        automato(lines_input[i]);
+        result = automato(lines_input[i]);
+
+        // Se o automato for aceito retorna a tabela e arvore
+        if (result == 1)
+        {
+            // table();
+            // Tree();
+        }
     }
-    qtd_lineGLC
-        fclose(file_GLC);
+
+    fclose(file_GLC);
 }
 
 void push(char value)
@@ -61,25 +72,21 @@ void pop()
     STACK_TOP--;
 }
 
-void automato(char *in)
+int automato(char *in)
 {
 Q0:
     if (STACK_TOP == -1)
-        printf("");
+        printf(".");
     else
         goto ERROR;
 Q1:
 
 ACCEPT:
-    printf("Accept : %s ", line);
-    printf("\n\n\n");
-    goto END;
+    printf("\n\nAccept : %s ", in);
+    return 1;
 ERROR:
-    printf("Reject : %s ", line);
-    printf("\n\n\n");
-    goto END;
-
-END:
+    printf("Reject : %s ", in);
+    return 0;
 };
 
 int readGLC(FILE *file_GLC)
@@ -108,10 +115,11 @@ int readGLC(FILE *file_GLC)
         {
             printf("O Segundo e Quarto caractere da linha deve ser uma virgula! Verifique o input file!\n Ex: _,_,____\n");
             return -1;
-        }
+        } /////>>-----------------------------------------------------<<
         // Se chegar no fim da linha armazena na proxima linha da matriz
-        if (read_char == '\n')
+        if (read_char == DELIMITER)
         {
+            glc[i][j] = '\0';
             i++;
             j = 0;
             continue;
@@ -130,7 +138,6 @@ int readINPUT(FILE *file_IN)
 
     while ((read_char = getc(file_IN)) != EOF)
     {
-        printf("%c   %d\n", read_char, j);
         // Se chegar no fim da linha armazena na proxima linha da matriz
         if (read_char == '\n')
         {
@@ -145,6 +152,21 @@ int readINPUT(FILE *file_IN)
     return i + 1;
 }
 
-void printGLC(int)
+void printGLC(int qtd_line)
 {
+    printf("--> GLC - Gramatica Livre de Contexto <--\n");
+
+    char x;
+    int j;
+    for (int i = 0; i < qtd_line; i++)
+    {
+        j = 0;
+        printf("\nδ : δ(%c, %c, ", glc[i][j], glc[i][j + 1]);
+        j = 2;
+        while (glc[i][j] != '\0')
+        {
+            printf("%c", glc[i][j]);
+            j++;
+        }
+    }
 }
