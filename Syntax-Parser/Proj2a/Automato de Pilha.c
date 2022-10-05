@@ -6,8 +6,8 @@
 
 int STACK_TOP = -1;
 char STACK[STACKSIZE];
-char glc[40][20];   //[<linhas>][<armazenamento por linha>]
-char input[40][20]; //[<linhas>][<armazenamento por linha>]
+char glc[40][20];         //[<linhas>][<armazenamento por linha>]
+char lines_input[40][20]; //[<linhas>][<armazenamento por linha>]
 
 int readINPUT(FILE *file_IN); // Retorna quantidade de linhas de entradas
 void readGLC(FILE *file_GLC);
@@ -35,7 +35,10 @@ void main()
     readGLC(file_GLC);
     qtd_entries = readINPUT(file_IN);
 
-    automato();
+    for (int i = 0; i < qtd_entries; i++)
+    {
+        automato(lines_input[i]);
+    }
 
     printf("%s", glc[0]);
     fclose(file_GLC);
@@ -53,26 +56,14 @@ void pop()
     STACK_TOP--;
 }
 
-void automato(int i)
+void automato(char in[])
 {
-
-    int result;
-
-ACCEPT:
-    printf("Accept : %s ", line);
-    printf("\n\n\n");
-    goto END;
-ERROR:
-    printf("Reject : %s ", line);
-    printf("\n\n\n");
-    goto END;
-
-END:
+    prinft("%c", in[0]);
 };
 void Q0(int i)
 {
-    if (STACK_TOP == -1)
-        printf("");
+
+    printf("");
     else
     {
         printf("O ");
@@ -136,7 +127,7 @@ int readINPUT(FILE *file_IN)
             continue;
         }
         // Atribui os caracteres no vetor que armazena o input
-        input[i][j] = read_char;
+        lines_input[i][j] = read_char;
         j++;
     }
     return i + 1;
