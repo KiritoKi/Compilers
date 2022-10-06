@@ -13,13 +13,18 @@
 
 int STACK_TOP = -1;
 char STACK[STACKSIZE];
-char glc[40][20];         //[<linhas>][<armazenamento por linha>]
+char glc[100][20];        //[<linhas>][<armazenamento por linha>]
 char lines_input[40][20]; //[<linhas>][<armazenamento por linha>]
-
+// ReadFileFunctions
 int readINPUT(FILE *file_IN); // Retorna quantidade de linhas de entradas
 int readGLC(FILE *file_GLC);
+//--> AUTOMATO <--
+int automato(char *in, int qtd_linesGLC);
+// PrintFunctions
 void printGLC(int qtd_line);
-int automato(char *in);
+void printTable();
+void printTree();
+// StackFunctions
 void push(char value);
 void pop();
 
@@ -50,11 +55,11 @@ int main()
         result = automato(lines_input[i]);
 
         // Se o automato for aceito retorna a tabela e arvore
-        if (result == 1)
-        {
-            // table();
-            // Tree();
-        }
+        /*if (result == 1)
+        //{
+             table();
+             Tree();
+        }*/
     }
 
     fclose(file_GLC);
@@ -72,17 +77,27 @@ void pop()
     STACK_TOP--;
 }
 
-int automato(char *in)
+int automato(char *in, int qtd_linesGLC)
 {
+    int i = 0; // line-glc control
+    goto Q0;
+
 Q0:
-    if (STACK_TOP == -1)
-        printf(".");
-    else
+    // Se o programa correr a linguagem e não encontrar nenhum δ : δ(ε,ε,XXX)
+    // Ou as tentativas existentes forem inválidas
+    if (i > qtd_linesGLC)
         goto ERROR;
+    // Se a pilha estiver zerada e existir uma δ : δ(ε,ε,XXX) na linguagem
+    if (STACK_TOP == -1 && in[0] == '_' && in[1] == '_')
+    {
+        push(in[2]); // WARNING ---------> Ainda funciona apenas com 1 caractere de valor inicial
+    }
+
+    i++;
 Q1:
 
 ACCEPT:
-    printf("\n\nAccept : %s ", in);
+    printf("\nAccept : %s ", in);
     return 1;
 ERROR:
     printf("Reject : %s ", in);
@@ -119,6 +134,7 @@ int readGLC(FILE *file_GLC)
         // Se chegar no fim da linha armazena na proxima linha da matriz
         if (read_char == DELIMITER)
         {
+            // Adiciona na proxima coluna a condição de parada para ler
             glc[i][j] = '\0';
             i++;
             j = 0;
@@ -141,6 +157,8 @@ int readINPUT(FILE *file_IN)
         // Se chegar no fim da linha armazena na proxima linha da matriz
         if (read_char == '\n')
         {
+            // Adiciona na proxima coluna a condição de parada para ler
+            lines_input[i][j] = '\0';
             i++;
             j = 0;
             continue;
@@ -169,4 +187,16 @@ void printGLC(int qtd_line)
             j++;
         }
     }
+    printf("\n\n");
+}
+
+void printTable()
+{
+    printf("--> Table - Parsing <--\n");
+    printf("%-15s %-15s %-15s %-15s %-15s %s\n", "i", "q", ".w", "Stack", "δ");
+}
+
+void printTree()
+{
+    printf("--> GLC - Gramatica Livre de Contexto <--\n");
 }
