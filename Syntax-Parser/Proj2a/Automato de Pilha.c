@@ -5,6 +5,7 @@
 // Delimitador para ler a linha do arquivo
 //(deve conter no final da cada linha até da ultima DEFAULT = enter)
 
+//-------------------->>Primeira linha do GLC-file deve ser _,_,S<<------
 //----------------------->>Favor usar '_' no lugar de 'ε'<<------------------------
 //------>>ATENÇÃO NO DELIMITER DE LINHA, DEVE EXISTIR NO FINAL DA LINHA NOS ARQUIVOS<<------------------------
 
@@ -15,6 +16,13 @@ int STACK_TOP = -1;
 char STACK[STACKSIZE];
 char glc[100][20];        //[<linhas>][<armazenamento por linha>]
 char lines_input[40][20]; //[<linhas>][<armazenamento por linha>]
+// Recovery Pilha
+int level_sto[200] = {-1};
+char trash_line_accepted[200][20];
+int itera_trash = 0;
+
+char *correct_string;
+
 // ReadFileFunctions
 int readINPUT(FILE *file_IN); // Retorna quantidade de linhas de entradas
 int readGLC(FILE *file_GLC);
@@ -25,8 +33,25 @@ void printGLC(int qtd_line);
 void printTable();
 void printTree();
 // StackFunctions
+void inversePush(char *line);
 void push(char value);
 void pop();
+// Recovery functions
+void sto_line_accepted(char *in);
+void lod_line_accepted();
+
+void sto_line_accepted(char *in)
+{
+    int i = 0;
+    // Insere a linha glc aceita no trash_line_accepted
+    while (in[i] != '\0')
+        trash_line_accepted[itera_trash][i];
+    // Incrementa o contador do armazenador de line_Accepted
+    itera_trash++;
+}
+void lod_line_accepted()
+{
+}
 
 int main()
 {
@@ -52,7 +77,6 @@ int main()
 
     for (int i = 0; i < qtd_entries; i++)
     {
-        result = automato(lines_input[i]);
 
         // Se o automato for aceito retorna a tabela e arvore
         /*if (result == 1)
@@ -61,8 +85,26 @@ int main()
              Tree();
         }*/
     }
-
+    fclose(file_IN);
     fclose(file_GLC);
+}
+
+// A UNSUAL PUSH inverte os caracteres a linha antes de dar push---->
+void inversePush(char *line)
+{
+    int i = 0;
+    // Conta quantos caracteres tem na linha pra inserir no STACK
+    while (line[i] != '\0')
+    {
+        i++;
+    }
+    i--;
+    // Vai inserir inverso no STACK os caracteres exceto os 2 primeiros _ _ XXXXXXX
+    while (i < 1)
+    {
+        push(line[i]);
+        i--;
+    }
 }
 
 void push(char value)
@@ -79,22 +121,69 @@ void pop()
 
 int automato(char *in, int qtd_linesGLC)
 {
-    int i = 0; // line-glc control
+    int itera_GLC = 0; // line-glc control
+    int token = 0;     // char-input control
+    int lvl_i = 0;     // level_sto control
     goto Q0;
 
+    // NODE Q0
 Q0:
     // Se o programa correr a linguagem e não encontrar nenhum δ : δ(ε,ε,XXX)
     // Ou as tentativas existentes forem inválidas
-    if (i > qtd_linesGLC)
+    if (itera_GLC > qtd_linesGLC)
         goto ERROR;
     // Se a pilha estiver zerada e existir uma δ : δ(ε,ε,XXX) na linguagem
-    if (STACK_TOP == -1 && in[0] == '_' && in[1] == '_')
+    // Ou seja a primeira linha do GLC-file deve ser _,_,S
+    if (STACK_TOP == -1 && glc[itera_GLC][0] == '_' && glc[itera_GLC][1] == '_')
     {
-        push(in[2]); // WARNING ---------> Ainda funciona apenas com 1 caractere de valor inicial
+        sto_line_accepted(glc[itera_GLC]); // Apenas armazena a linha do glc que foi aceita(Usado para recuperar dado caso a expansão seja ambigua)
+        inversePush(glc[itera_GLC]);       // passa a linha do glc correspondente para um PUSH na pilha 'STACK'.
+        itera_GLC = 0;
+        goto Q1;
+    }
+    itera_GLC++;
+
+    // NODE Q1
+Q1:
+    // Se o programa correr a linguagem e não encontrar nenhum parametro correspondente ao topo da pilha
+    // Ou as tentativas existentes forem inválidas --> goto error
+    if (itera_GLC > qtd_linesGLC)
+    {
+        // Se existir mais caminhos para testar ele volta 1 instancia e le as linhas de onde parou
+        if (lvl_i != 0)
+        {
+            lvl_i--;
+            token--;
+            lod_line_accepted();
+            itera_GLC = level_sto[lvl_i];
+            goto Q1;
+        }
+        goto ERROR;
     }
 
-    i++;
-Q1:
+    // Se o programa terminar de ler a linha com sucesso e chegar ao fim -> goto accept
+    if (in[token] == '\0')
+        goto ACCEPT;
+
+    // SE token atual é topo da pilha//SE token = 1º posição de _, _, ___ //Se token = 2º posição de _,_,___
+    // VALIDAÇÃO DO CARACTERE INPUT E ENTÃO POP(STACK)
+    if (in[token] == STACK[STACK_TOP] && in[token] == glc[itera_GLC][0] && in[token] == glc[itera_GLC][1])
+    {
+        pop();
+        // correct_string+= in[token];
+        token++;
+    }
+    // Se o topo da pilha for o valor
+    else if (glc[itera_GLC][1] == STACK[STACK_TOP])
+    {
+
+        pop();
+        inversePush(glc[itera_GLC]);
+        itera_GLC = 0;
+        goto Q1;
+    }
+
+    itera_GLC++;
 
 ACCEPT:
     printf("\nAccept : %s ", in);
@@ -113,20 +202,17 @@ int readGLC(FILE *file_GLC)
 
     while ((read_char = getc(file_GLC)) != EOF)
     {
-        // Se a virgula não tiver na segunda e na quarta posição ele retorna erro
+        // Se a virgula não tiver na segunda e na quarta posição dnas linha do GLC_FILE ele retorna erro
         // Só deve existir um caractere antes da primeira e antes da segunda virgula
         if (read_char == ',' && j == 1 || read_char == ',' && j == 2)
         {
             if (virgulini1 == 0)
-            {
                 virgulini1 = 1;
-                continue;
-            }
             else if (virgulini2 == 0)
                 virgulini2 = 1;
             continue;
         }
-        else if (read_char == ',' && j == 1 && virgulini1 == 0 || read_char == ',' && j == 2 && virgulini2 == 0)
+        else if (read_char != ',' && j == 1 && virgulini1 == 0 || read_char != ',' && j == 2 && virgulini2 == 0)
         {
             printf("O Segundo e Quarto caractere da linha deve ser uma virgula! Verifique o input file!\n Ex: _,_,____\n");
             return -1;
