@@ -45,12 +45,14 @@ void sto_line_accepted(char *in)
     int i = 0;
     // Insere a linha glc aceita no trash_line_accepted
     while (in[i] != '\0')
-        trash_line_accepted[itera_trash][i];
+        trash_line_accepted[itera_trash][i] = in[i];
     // Incrementa o contador do armazenador de line_Accepted
     itera_trash++;
+    return;
 }
 void lod_line_accepted()
 {
+    return;
 }
 
 int main()
@@ -67,16 +69,17 @@ int main()
     if (file_GLC == NULL) // Se houve erro na abertura
     {
         printf("Problemas na abertura do arquivo\n");
-        return;
+        return -1;
     }
 
     qtd_lineGLC = readGLC(file_GLC);
     qtd_entries = readINPUT(file_IN);
-
+    printf("%d  %d", qtd_lineGLC, qtd_entries);
     printGLC(qtd_lineGLC);
-
     for (int i = 0; i < qtd_entries; i++)
     {
+
+        result = automato(lines_input[i], qtd_lineGLC);
 
         // Se o automato for aceito retorna a tabela e arvore
         /*if (result == 1)
@@ -124,8 +127,7 @@ int automato(char *in, int qtd_linesGLC)
     int itera_GLC = 0; // line-glc control
     int token = 0;     // char-input control
     int lvl_i = 0;     // level_sto control
-    goto Q0;
-
+    printf("aa ");
     // NODE Q0
 Q0:
     // Se o programa correr a linguagem e não encontrar nenhum δ : δ(ε,ε,XXX)
@@ -136,8 +138,10 @@ Q0:
     // Ou seja a primeira linha do GLC-file deve ser _,_,S
     if (STACK_TOP == -1 && glc[itera_GLC][0] == '_' && glc[itera_GLC][1] == '_')
     {
-        sto_line_accepted(glc[itera_GLC]); // Apenas armazena a linha do glc que foi aceita(Usado para recuperar dado caso a expansão seja ambigua)
-        inversePush(glc[itera_GLC]);       // passa a linha do glc correspondente para um PUSH na pilha 'STACK'.
+
+        // sto_line_accepted(glc[itera_GLC]); // Apenas armazena a linha do glc que foi aceita(Usado para recuperar dado caso a expansão seja ambigua)
+
+        inversePush(glc[itera_GLC]); // passa a linha do glc correspondente para um PUSH na pilha 'STACK'.
         itera_GLC = 0;
         goto Q1;
     }
@@ -154,7 +158,7 @@ Q1:
         {
             lvl_i--;
             token--;
-            lod_line_accepted();
+            // lod_line_accepted();
             itera_GLC = level_sto[lvl_i];
             goto Q1;
         }
@@ -169,13 +173,18 @@ Q1:
     // VALIDAÇÃO DO CARACTERE INPUT E ENTÃO POP(STACK)
     if (in[token] == STACK[STACK_TOP] && in[token] == glc[itera_GLC][0] && in[token] == glc[itera_GLC][1])
     {
+        // sto_line_accepted(glc[itera_GLC]); // Apenas armazena a linha do glc que foi aceita(Usado para recuperar dado caso a expansão seja ambigua)
+        lvl_i++;
+
         pop();
-        // correct_string+= in[token];
+
         token++;
     }
     // Se o topo da pilha for o valor
     else if (glc[itera_GLC][1] == STACK[STACK_TOP])
     {
+        // sto_line_accepted(glc[itera_GLC]); // Apenas armazena a linha do glc que foi aceita(Usado para recuperar dado caso a expansão seja ambigua)
+        lvl_i++;
 
         pop();
         inversePush(glc[itera_GLC]);
@@ -184,7 +193,7 @@ Q1:
     }
 
     itera_GLC++;
-
+    goto Q1;
 ACCEPT:
     printf("\nAccept : %s ", in);
     return 1;
@@ -204,7 +213,7 @@ int readGLC(FILE *file_GLC)
     {
         // Se a virgula não tiver na segunda e na quarta posição dnas linha do GLC_FILE ele retorna erro
         // Só deve existir um caractere antes da primeira e antes da segunda virgula
-        if (read_char == ',' && j == 1 || read_char == ',' && j == 2)
+        if ((read_char == ',' && j == 1) || (read_char == ',' && j == 2))
         {
             if (virgulini1 == 0)
                 virgulini1 = 1;
@@ -212,7 +221,7 @@ int readGLC(FILE *file_GLC)
                 virgulini2 = 1;
             continue;
         }
-        else if (read_char != ',' && j == 1 && virgulini1 == 0 || read_char != ',' && j == 2 && virgulini2 == 0)
+        else if ((read_char != ',' && j == 1 && virgulini1 == 0) || (read_char != ',' && j == 2 && virgulini2 == 0))
         {
             printf("O Segundo e Quarto caractere da linha deve ser uma virgula! Verifique o input file!\n Ex: _,_,____\n");
             return -1;
@@ -230,7 +239,13 @@ int readGLC(FILE *file_GLC)
         glc[i][j] = read_char;
         j++;
     }
-    return i + 1;
+    int k = 0;
+    // Se o delimitador for \n entao vai ter uma linha a mais no final do arq
+    if (DELIMITER == '\n')
+    {
+        k = -1;
+    }
+    return i + k;
 }
 
 int readINPUT(FILE *file_IN)
@@ -253,16 +268,22 @@ int readINPUT(FILE *file_IN)
         lines_input[i][j] = read_char;
         j++;
     }
-    return i + 1;
+    int k = 0;
+    // Se o delimitador for \n entao vai ter uma linha a mais no final do arq
+    if (DELIMITER == '\n')
+    {
+        k = -1;
+    }
+    return i + k;
 }
 
 void printGLC(int qtd_line)
 {
     printf("--> GLC - Gramatica Livre de Contexto <--\n");
 
-    char x;
+    // char x;
     int j;
-    for (int i = 0; i < qtd_line; i++)
+    for (int i = 0; i < qtd_line - 1; i++)
     {
         j = 0;
         printf("\nδ : δ(%c, %c, ", glc[i][j], glc[i][j + 1]);
@@ -279,10 +300,10 @@ void printGLC(int qtd_line)
 void printTable()
 {
     printf("--> Table - Parsing <--\n");
-    printf("%-15s %-15s %-15s %-15s %-15s %s\n", "i", "q", ".w", "Stack", "δ");
+    // printf("%-15c %-15c %-15c %-15c %-15s %c\n", "i", "q", ".w", "Stack", "δ");
 }
 
 void printTree()
 {
-    printf("--> GLC - Gramatica Livre de Contexto <--\n");
+    printf("--> Tree -  <--\n");
 }

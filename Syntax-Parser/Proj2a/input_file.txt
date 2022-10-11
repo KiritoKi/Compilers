@@ -1,7 +1,2 @@
-aaacbbb
-aacbb
-acb
-cab
-abc
-aacb
-acbb
+g(){w(1){(x-1);};r(x);}m(){i=1;r((1+1));}
+m(){i=1;r((1+1));}
