@@ -13,34 +13,7 @@
 #define DELIMITER '\n'
 #define true 1
 #define false 0
-
-typedef struct node
-{
-    char key;
-    struct node *primeiroFilho;
-    struct node *proximoIrmao;
-} NODE;
-
-typedef NODE *PONT;
-
-PONT inicializa(char key)
-{
-    return (createNewNode(key));
-}
-
-PONT createNewNode(char key)
-{
-    PONT new = (PONT)malloc(sizeof(NODE));
-    new->primeiroFilho = NULL;
-    new->proximoIrmao = NULL;
-    new->key = key;
-    return (new);
-}
-
-int insert(PONT raiz, char newKey, char keyFather)
-{
-    PONT
-}
+#define bool int
 
 int STACK_TOP = -1;
 char STACK[STACKSIZE];
@@ -58,6 +31,78 @@ void printTree();
 void inversePush(char *line);
 void push(char value);
 void pop();
+
+typedef struct node
+{
+    char key;
+    struct node *firstSon;
+    struct node *nextBrother;
+} NODE;
+
+typedef NODE *PONT;
+
+PONT createNewNode(char key)
+{
+    PONT new = (PONT)malloc(sizeof(NODE));
+    new->firstSon = NULL;
+    new->nextBrother = NULL;
+    new->key = key;
+    return (new);
+}
+
+PONT inicializaTree(char key)
+{
+    return (createNewNode(key));
+}
+
+bool insere(PONT root, char newKey, char fatherKey)
+{
+    PONT father = searchKey(fatherKey, root);
+    if (!father)
+        return false;
+    PONT son = createNewNode(newKey);
+    PONT p = father->firstSon;
+    if (!p)
+        father->firstSon = son;
+    else
+    {
+        while (p->nextBrother)
+            p = p->nextBrother;
+        p->nextBrother = son;
+    }
+    return (true);
+}
+
+void showTree(PONT root)
+{
+    if (root == NULL)
+        return;
+    printf("%c(", root->key);
+    PONT p = root->firstSon;
+    while (p)
+    {
+        showTree(p);
+        p = p->nextBrother;
+    }
+    printf(")");
+}
+
+PONT searchKey(char key, PONT root)
+{
+    if (root == NULL)
+        return NULL;
+    if (root->key == key)
+        return root;
+    PONT p = root->firstSon;
+    while (p)
+    {
+        PONT resp = searchKey(key, p);
+        if (resp)
+            return resp;
+        p = p->nextBrother;
+    }
+    return (NULL);
+}
 
 int main()
 {
@@ -92,6 +137,7 @@ void inversePush(char *line)
         i++;
     }
     i--;
+
     // Vai inserir inverso no STACK os caracteres exceto os 2 primeiros _ _ XXXXXXX
     while (i < 1)
     {
@@ -140,7 +186,7 @@ int readINPUT(FILE *file_IN)
 void printTableHead()
 {
     printf("\t\t--> Table - Parsing <--\n");
-    printf("%-5s %-18s %-30s %-30s %-5s %5s\n", "i", "q", ".w", "Stack", "δ", "p");
+    printf("%-5s %-18s %-30s %-20s %-5s %5s\n", "i", "q", ".w", "Stack", "δ", "p");
 }
 
 void printLineTable(char *q, char *w, char *d, char *p, int token)
@@ -168,7 +214,7 @@ void printLineTable(char *q, char *w, char *d, char *p, int token)
         w2[j] = w[token + j];
     w2[j] = '\0';
 
-    printf("%-5d %-5s %s.%s %30s %-5s %5s\n", STEP, q, w1, w2, stackPrint, d, p);
+    printf("%-5d %-5s %s.%s %20s %-5s %5s\n", STEP, q, w1, w2, stackPrint, d, p);
     return;
 }
 
@@ -181,10 +227,13 @@ void automato(char *in)
 {
     STEP = 0;
     int token = 0;
+    char tree[sizeof(in)];
+
     goto Q0;
+
 Q0:
+    PONT tree = inicializaTree('S');
     printLineTable("Q0", in, "δ0", "-", 0);
-    PONT tree = inicializa('S');
     push('S'); // stack[0] = 'S'
     goto Q1;
 
