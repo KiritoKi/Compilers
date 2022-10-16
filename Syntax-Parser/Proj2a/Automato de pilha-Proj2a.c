@@ -11,9 +11,6 @@
 
 #define STACKSIZE 500
 #define DELIMITER '\n'
-#define true 1
-#define false 0
-#define bool int
 
 int STACK_TOP = -1;
 char STACK[STACKSIZE];
@@ -31,78 +28,6 @@ void printTree();
 void inversePush(char *line);
 void push(char value);
 void pop();
-
-typedef struct node
-{
-    char key;
-    struct node *firstSon;
-    struct node *nextBrother;
-} NODE;
-
-typedef NODE *PONT;
-
-PONT createNewNode(char key)
-{
-    PONT new = (PONT)malloc(sizeof(NODE));
-    new->firstSon = NULL;
-    new->nextBrother = NULL;
-    new->key = key;
-    return (new);
-}
-
-PONT inicializaTree(char key)
-{
-    return (createNewNode(key));
-}
-
-bool insere(PONT root, char newKey, char fatherKey)
-{
-    PONT father = searchKey(fatherKey, root);
-    if (!father)
-        return false;
-    PONT son = createNewNode(newKey);
-    PONT p = father->firstSon;
-    if (!p)
-        father->firstSon = son;
-    else
-    {
-        while (p->nextBrother)
-            p = p->nextBrother;
-        p->nextBrother = son;
-    }
-    return (true);
-}
-
-void showTree(PONT root)
-{
-    if (root == NULL)
-        return;
-    printf("%c(", root->key);
-    PONT p = root->firstSon;
-    while (p)
-    {
-        showTree(p);
-        p = p->nextBrother;
-    }
-    printf(")");
-}
-
-PONT searchKey(char key, PONT root)
-{
-    if (root == NULL)
-        return NULL;
-    if (root->key == key)
-        return root;
-    PONT p = root->firstSon;
-    while (p)
-    {
-        PONT resp = searchKey(key, p);
-        if (resp)
-            return resp;
-        p = p->nextBrother;
-    }
-    return (NULL);
-}
 
 int main()
 {
@@ -127,7 +52,7 @@ int main()
     fclose(file_IN);
 }
 
-// A UNSUAL PUSH inverte os caracteres a linha antes de dar push---->
+// Nao ta sendo utilizado ainda <-A UNSUAL PUSH inverte os caracteres a linha antes de dar push---->
 void inversePush(char *line)
 {
     int i = 0;
@@ -220,19 +145,21 @@ void printLineTable(char *q, char *w, char *d, char *p, int token)
 
 void printTree()
 {
-    printf("\n\n--> Tree - Parsing <--\n");
+    printf("\n\n\t\t--> Tree - Parsing <--\n");
 }
 
 void automato(char *in)
 {
-    STEP = 0;
     int token = 0;
-    char tree[sizeof(in)];
-
+    char tree[10000] = {'\0'}; // Foi obrigatorio o uso de vetor ao invés de struct dinamica
+    int aux_f[100] = {0};
+    int aux_ind = 0;
+    int count_tree = 0;
+    int aux;
     goto Q0;
 
 Q0:
-    PONT tree = inicializaTree('S');
+    tree[count_tree] = 'S';
     printLineTable("Q0", in, "δ0", "-", 0);
     push('S'); // stack[0] = 'S'
     goto Q1;
@@ -253,6 +180,9 @@ Q1:
         printLineTable("Q1", in, "δ1", "p1", token);
         pop();
         push('M');
+
+        tree[++count_tree] = 'M';
+
         goto Q1;
     }
     else if ((in[token] == 'g') && (STACK[STACK_TOP] == 'S'))
@@ -261,6 +191,13 @@ Q1:
         pop();
         push('M');
         push('G');
+
+        aux = ++count_tree; // armazena valor
+        tree[++count_tree] = 'G';
+        tree[++count_tree] = 'M';
+        aux_f[aux_ind++] = count_tree; // 2
+        count_tree = aux;              // recupera valor
+
         goto Q1;
     }
     else if ((in[token] == 'f') && (STACK[STACK_TOP] == 'S'))
@@ -270,6 +207,15 @@ Q1:
         push('M');
         push('G');
         push('F');
+
+        aux = ++count_tree; // armazena valor
+        tree[++count_tree] = 'F';
+        tree[++count_tree] = 'G';
+        aux_f[aux_ind++] = count_tree; // 2
+        tree[++count_tree] = 'M';
+        aux_f[aux_ind++] = count_tree; // 3
+        count_tree = aux;              // recupera valor
+
         goto Q1;
     }
     else if ((in[token] == 'f') && (STACK[STACK_TOP] == 'F'))
@@ -288,6 +234,24 @@ Q1:
         push(')');
         push('(');
         push('f');
+        count_tree = 12 * count_tree + 1;
+        aux = count_tree;
+
+        tree[count_tree++] = 'f';
+        tree[count_tree++] = '(';
+        tree[count_tree++] = ')';
+        tree[count_tree++] = '{';
+        aux_f[aux_ind++] = count_tree;
+        tree[count_tree++] = 'C';
+        tree[count_tree++] = ';';
+        tree[count_tree++] = 'r';
+        tree[count_tree++] = '(';
+        aux_f[aux_ind++] = count_tree;
+        tree[count_tree++] = 'E';
+        tree[count_tree++] = ')';
+        tree[count_tree++] = ';';
+        tree[count_tree++] = '}';
+        count_tree = aux;
         goto Q1;
     }
     else if ((in[token] == 'g') && (STACK[STACK_TOP] == 'G'))
@@ -306,6 +270,25 @@ Q1:
         push(')');
         push('(');
         push('g');
+        count_tree = 12 * count_tree + 1;
+        aux = count_tree;
+
+        tree[count_tree++] = 'g';
+        tree[count_tree++] = '(';
+        tree[count_tree++] = ')';
+        tree[count_tree++] = '{';
+        aux_f[aux_ind++] = count_tree;
+        tree[count_tree++] = 'C';
+        tree[count_tree++] = ';';
+        tree[count_tree++] = 'r';
+        tree[count_tree++] = '(';
+        aux_f[aux_ind++] = count_tree;
+        tree[count_tree++] = 'E';
+        tree[count_tree++] = ')';
+        tree[count_tree++] = ';';
+        tree[count_tree++] = '}';
+
+        count_tree = aux;
         goto Q1;
     }
     else if ((in[token] == 'm') && (STACK[STACK_TOP] == 'M'))
@@ -324,6 +307,25 @@ Q1:
         push(')');
         push('(');
         push('m');
+        count_tree = 12 * count_tree + 1;
+        aux = count_tree;
+
+        tree[count_tree++] = 'm';
+        tree[count_tree++] = '(';
+        tree[count_tree++] = ')';
+        tree[count_tree++] = '{';
+        aux_f[aux_ind++] = count_tree;
+        tree[count_tree++] = 'C';
+        tree[count_tree++] = ';';
+        tree[count_tree++] = 'r';
+        tree[count_tree++] = '(';
+        aux_f[aux_ind++] = count_tree;
+        tree[count_tree++] = 'E';
+        tree[count_tree++] = ')';
+        tree[count_tree++] = ';';
+        tree[count_tree++] = '}';
+
+        count_tree = aux;
         goto Q1;
     }
     else if ((in[token] == '0') && (STACK[STACK_TOP] == 'E'))
@@ -331,6 +333,7 @@ Q1:
         printLineTable("Q1", in, "δ7", "p7", token);
         pop();
         push('0');
+        count_tree = 12 * count_tree + 1 tree[count_tree++] = '0';
         goto Q1;
     }
     else if ((in[token] == '1') && (STACK[STACK_TOP] == 'E'))
@@ -499,36 +502,42 @@ Q1:
     { // token_accepted = f      //t25
         printLineTable("Q1", in, "δ25", "-", token);
         pop();
+
         goto Q1get;
     }
     else if ((in[token] == 'g') && (STACK[STACK_TOP] == 'g'))
     { // token_accepted = g     //t26
         printLineTable("Q1", in, "δ26", "-", token);
         pop();
+
         goto Q1get;
     }
     else if ((in[token] == 'm') && (STACK[STACK_TOP] == 'm'))
     { // token_accepted = m     //t27
         printLineTable("Q1", in, "δ27", "-", token);
         pop();
+
         goto Q1get;
     }
     else if ((in[token] == '(') && (STACK[STACK_TOP] == '('))
     { // token_accepted = (     //t28
         printLineTable("Q1", in, "δ28", "-", token);
         pop();
+
         goto Q1get;
     }
     else if ((in[token] == ')') && (STACK[STACK_TOP] == ')'))
     { // token_accepted = )     //t29
         printLineTable("Q1", in, "δ29", "-", token);
         pop();
+
         goto Q1get;
     }
     else if ((in[token] == '{') && (STACK[STACK_TOP] == '{'))
     { // token_accepted = {     //t30
         printLineTable("Q1", in, "δ30", "-", token);
         pop();
+
         goto Q1get;
     }
     else if ((in[token] == '}') && (STACK[STACK_TOP] == '}'))
