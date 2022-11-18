@@ -8,14 +8,23 @@
 //-------------------->>Primeira linha do GLC-file deve ser _,_,S<<------
 //----------------------->>Favor usar '_' no lugar de 'ε'<<------------------------
 //------>>ATENÇÃO NO DELIMITER DE LINHA, DEVE EXISTIR NO FINAL DA LINHA NOS ARQUIVOS<<------------------------
+typedef struct hash_tree
+{
+    int id;
+    char value;
+
+} Htree;
 
 #define STACKSIZE 500
+#define MAX_DEPTH 50
 #define DELIMITER '\n'
 
 int STACK_TOP = -1;
 char STACK[STACKSIZE];
 char lines_input[40][150]; //[<linhas>][<armazenamento por linha>]
+int depth_tree[MAX_DEPTH];
 int STEP = -1;
+
 // ReadFileFunctions
 int readINPUT(FILE *file_IN); // Retorna quantidade de linhas de entradas
 //--> AUTOMATO <--
@@ -152,9 +161,9 @@ void automato(char *in)
 {
     int token = 0;
     char tree[10000] = {'\0'}; // Foi obrigatorio o uso de vetor ao invés de struct dinamica
+    int count_tree = 0;
     int aux_f[100] = {0};
     int aux_ind = 0;
-    int count_tree = 0;
     int aux;
     goto Q0;
 
@@ -166,7 +175,6 @@ Q0:
 
     // NODE Q1
 Q1get:
-
     token += 1;
 
 Q1:
@@ -180,8 +188,8 @@ Q1:
         printLineTable("Q1", in, "δ1", "p1", token);
         pop();
         push('M');
-
-        tree[++count_tree] = 'M';
+        count_tree = 12 * count_tree + 1;
+        tree[count_tree] = 'M';
 
         goto Q1;
     }
@@ -192,11 +200,9 @@ Q1:
         push('M');
         push('G');
 
-        aux = ++count_tree; // armazena valor
-        tree[++count_tree] = 'G';
+        count_tree = 12 * count_tree + 1;
+        tree[count_tree] = 'G';
         tree[++count_tree] = 'M';
-        aux_f[aux_ind++] = count_tree; // 2
-        count_tree = aux;              // recupera valor
 
         goto Q1;
     }
@@ -208,13 +214,10 @@ Q1:
         push('G');
         push('F');
 
-        aux = ++count_tree; // armazena valor
-        tree[++count_tree] = 'F';
+        count_tree = 12 * count_tree + 1;
+        tree[count_tree] = 'F';
         tree[++count_tree] = 'G';
-        aux_f[aux_ind++] = count_tree; // 2
         tree[++count_tree] = 'M';
-        aux_f[aux_ind++] = count_tree; // 3
-        count_tree = aux;              // recupera valor
 
         goto Q1;
     }
@@ -235,23 +238,19 @@ Q1:
         push('(');
         push('f');
         count_tree = 12 * count_tree + 1;
-        aux = count_tree;
 
-        tree[count_tree++] = 'f';
-        tree[count_tree++] = '(';
-        tree[count_tree++] = ')';
-        tree[count_tree++] = '{';
-        aux_f[aux_ind++] = count_tree;
-        tree[count_tree++] = 'C';
-        tree[count_tree++] = ';';
-        tree[count_tree++] = 'r';
-        tree[count_tree++] = '(';
-        aux_f[aux_ind++] = count_tree;
-        tree[count_tree++] = 'E';
-        tree[count_tree++] = ')';
-        tree[count_tree++] = ';';
-        tree[count_tree++] = '}';
-        count_tree = aux;
+        tree[count_tree] = 'f';
+        tree[++count_tree] = '(';
+        tree[++count_tree] = ')';
+        tree[++count_tree] = '{';
+        tree[++count_tree] = 'C';
+        tree[++count_tree] = ';';
+        tree[++count_tree] = 'r';
+        tree[++count_tree] = '(';
+        tree[++count_tree] = 'E';
+        tree[++count_tree] = ')';
+        tree[++count_tree] = ';';
+        tree[++count_tree] = '}';
         goto Q1;
     }
     else if ((in[token] == 'g') && (STACK[STACK_TOP] == 'G'))
@@ -271,24 +270,18 @@ Q1:
         push('(');
         push('g');
         count_tree = 12 * count_tree + 1;
-        aux = count_tree;
-
         tree[count_tree++] = 'g';
-        tree[count_tree++] = '(';
-        tree[count_tree++] = ')';
-        tree[count_tree++] = '{';
-        aux_f[aux_ind++] = count_tree;
-        tree[count_tree++] = 'C';
-        tree[count_tree++] = ';';
-        tree[count_tree++] = 'r';
-        tree[count_tree++] = '(';
-        aux_f[aux_ind++] = count_tree;
-        tree[count_tree++] = 'E';
-        tree[count_tree++] = ')';
-        tree[count_tree++] = ';';
-        tree[count_tree++] = '}';
-
-        count_tree = aux;
+        tree[++count_tree] = '(';
+        tree[++count_tree] = ')';
+        tree[++count_tree] = '{';
+        tree[++count_tree] = 'C';
+        tree[++count_tree] = ';';
+        tree[++count_tree] = 'r';
+        tree[++count_tree] = '(';
+        tree[++count_tree] = 'E';
+        tree[++count_tree] = ')';
+        tree[++count_tree] = ';';
+        tree[++count_tree] = '}';
         goto Q1;
     }
     else if ((in[token] == 'm') && (STACK[STACK_TOP] == 'M'))
@@ -308,24 +301,18 @@ Q1:
         push('(');
         push('m');
         count_tree = 12 * count_tree + 1;
-        aux = count_tree;
-
-        tree[count_tree++] = 'm';
-        tree[count_tree++] = '(';
-        tree[count_tree++] = ')';
-        tree[count_tree++] = '{';
-        aux_f[aux_ind++] = count_tree;
-        tree[count_tree++] = 'C';
-        tree[count_tree++] = ';';
-        tree[count_tree++] = 'r';
-        tree[count_tree++] = '(';
-        aux_f[aux_ind++] = count_tree;
-        tree[count_tree++] = 'E';
-        tree[count_tree++] = ')';
-        tree[count_tree++] = ';';
-        tree[count_tree++] = '}';
-
-        count_tree = aux;
+        tree[count_tree] = 'm';
+        tree[++count_tree] = '(';
+        tree[++count_tree] = ')';
+        tree[++count_tree] = '{';
+        tree[++count_tree] = 'C';
+        tree[++count_tree] = ';';
+        tree[++count_tree] = 'r';
+        tree[++count_tree] = '(';
+        tree[++count_tree] = 'E';
+        tree[++count_tree] = ')';
+        tree[++count_tree] = ';';
+        tree[++count_tree] = '}';
         goto Q1;
     }
     else if ((in[token] == '0') && (STACK[STACK_TOP] == 'E'))
@@ -333,7 +320,8 @@ Q1:
         printLineTable("Q1", in, "δ7", "p7", token);
         pop();
         push('0');
-        count_tree = 12 * count_tree + 1 tree[count_tree++] = '0';
+        count_tree = 12 * count_tree + 1;
+        tree[count_tree] = '0';
         goto Q1;
     }
     else if ((in[token] == '1') && (STACK[STACK_TOP] == 'E'))
@@ -341,6 +329,8 @@ Q1:
         printLineTable("Q1", in, "δ8", "p8", token);
         pop();
         push('1');
+        count_tree = 12 * count_tree + 1;
+        tree[count_tree] = '1';
         goto Q1;
     }
     else if ((in[token] == 'x') && (STACK[STACK_TOP] == 'E'))
@@ -348,6 +338,8 @@ Q1:
         printLineTable("Q1", in, "δ9", "p9", token);
         pop();
         push('x');
+        count_tree = 12 * count_tree + 1;
+        tree[count_tree] = 'x';
         goto Q1;
     }
     else if ((in[token] == 'y') && (STACK[STACK_TOP] == 'E'))
@@ -355,6 +347,8 @@ Q1:
         printLineTable("Q1", in, "δ10", "p10", token);
         pop();
         push('y');
+        count_tree = 12 * count_tree + 1;
+        tree[count_tree] = 'y';
         goto Q1;
     }
     else if ((in[token] == '(') && (STACK[STACK_TOP] == 'E'))
@@ -366,6 +360,14 @@ Q1:
         push('X');
         push('E');
         push('(');
+
+        count_tree = 12 * count_tree + 1;
+        tree[count_tree] = '(';
+        tree[++count_tree] = 'E';
+        tree[++count_tree] = 'X';
+        tree[++count_tree] = 'E';
+        tree[++count_tree] = ')';
+
         goto Q1;
     }
     else if ((in[token] == '+') && (STACK[STACK_TOP] == 'X'))
@@ -373,6 +375,9 @@ Q1:
         printLineTable("Q1", in, "δ12", "p12", token);
         pop();
         push('+');
+
+        count_tree = 12 * count_tree + 1;
+        tree[count_tree] = '+';
         goto Q1;
     }
     else if ((in[token] == '-') && (STACK[STACK_TOP] == 'X'))
@@ -380,6 +385,9 @@ Q1:
         printLineTable("Q1", in, "δ13", "p13", token);
         pop();
         push('-');
+
+        count_tree = 12 * count_tree + 1;
+        tree[count_tree] = '-';
         goto Q1;
     }
     else if ((in[token] == '*') && (STACK[STACK_TOP] == 'X'))
@@ -387,6 +395,9 @@ Q1:
         printLineTable("Q1", in, "δ14", "p14", token);
         pop();
         push('*');
+
+        count_tree = 12 * count_tree + 1;
+        tree[count_tree] = '*';
         goto Q1;
     }
     else if ((in[token] == '/') && (STACK[STACK_TOP] == 'X'))
@@ -394,6 +405,9 @@ Q1:
         printLineTable("Q1", in, "δ15", "p15", token);
         pop();
         push('/');
+
+        count_tree = 12 * count_tree + 1;
+        tree[count_tree] = '/';
         goto Q1;
     }
     else if ((in[token] == 'h') && (STACK[STACK_TOP] == 'C'))
@@ -403,6 +417,11 @@ Q1:
         push('E');
         push('=');
         push('h');
+
+        count_tree = 12 * count_tree + 1;
+        tree[count_tree] = 'h';
+        tree[++count_tree] = '=';
+        tree[++count_tree] = 'E';
         goto Q1;
     }
     else if ((in[token] == 'i') && (STACK[STACK_TOP] == 'C'))
@@ -412,6 +431,11 @@ Q1:
         push('E');
         push('=');
         push('i');
+
+        count_tree = 12 * count_tree + 1;
+        tree[count_tree] = 'i';
+        tree[++count_tree] = '=';
+        tree[++count_tree] = 'E';
         goto Q1;
     }
     else if ((in[token] == 'j') && (STACK[STACK_TOP] == 'C'))
@@ -421,6 +445,11 @@ Q1:
         push('E');
         push('=');
         push('j');
+
+        count_tree = 12 * count_tree + 1;
+        tree[count_tree] = 'j';
+        tree[++count_tree] = '=';
+        tree[++count_tree] = 'E';
         goto Q1;
     }
     else if ((in[token] == 'k') && (STACK[STACK_TOP] == 'C'))
@@ -430,6 +459,11 @@ Q1:
         push('E');
         push('=');
         push('k');
+
+        count_tree = 12 * count_tree + 1;
+        tree[count_tree] = 'k';
+        tree[++count_tree] = '=';
+        tree[++count_tree] = 'E';
         goto Q1;
     }
     else if ((in[token] == 'z') && (STACK[STACK_TOP] == 'C'))
@@ -439,6 +473,11 @@ Q1:
         push('E');
         push('=');
         push('z');
+
+        count_tree = 12 * count_tree + 1;
+        tree[count_tree] = 'z';
+        tree[++count_tree] = '=';
+        tree[++count_tree] = 'E';
         goto Q1;
     }
     else if ((in[token] == '(') && (STACK[STACK_TOP] == 'C'))
@@ -450,6 +489,13 @@ Q1:
         push('X');
         push('E');
         push('(');
+
+        count_tree = 12 * count_tree + 1;
+        tree[count_tree] = '(';
+        tree[++count_tree] = 'E';
+        tree[++count_tree] = 'X';
+        tree[++count_tree] = 'E';
+        tree[++count_tree] = ')';
         goto Q1;
     }
     else if ((in[token] == 'w') && (STACK[STACK_TOP] == 'C'))
@@ -464,6 +510,16 @@ Q1:
         push('E');
         push('(');
         push('w');
+
+        count_tree = 12 * count_tree + 1;
+        tree[count_tree] = 'w';
+        tree[++count_tree] = '(';
+        tree[++count_tree] = 'E';
+        tree[++count_tree] = ')';
+        tree[++count_tree] = '{';
+        tree[++count_tree] = 'C';
+        tree[++count_tree] = ';';
+        tree[++count_tree] = '}';
         goto Q1;
     }
     else if ((in[token] == 'f') && (STACK[STACK_TOP] == 'C'))
@@ -478,6 +534,15 @@ Q1:
         push('E');
         push('(');
         push('f');
+        count_tree = 12 * count_tree + 1;
+        tree[count_tree] = 'f';
+        tree[++count_tree] = '(';
+        tree[++count_tree] = 'E';
+        tree[++count_tree] = ')';
+        tree[++count_tree] = '{';
+        tree[++count_tree] = 'C';
+        tree[++count_tree] = ';';
+        tree[++count_tree] = '}';
         goto Q1;
     }
     else if ((in[token] == 'o') && (STACK[STACK_TOP] == 'C'))
@@ -496,6 +561,20 @@ Q1:
         push('E');
         push('(');
         push('o');
+
+        count_tree = 12 * count_tree + 1;
+        tree[count_tree] = 'o';
+        tree[++count_tree] = '(';
+        tree[++count_tree] = 'E';
+        tree[++count_tree] = ';';
+        tree[++count_tree] = 'E';
+        tree[++count_tree] = ';';
+        tree[++count_tree] = 'E';
+        tree[++count_tree] = ')';
+        tree[++count_tree] = '{';
+        tree[++count_tree] = 'C';
+        tree[++count_tree] = ';';
+        tree[++count_tree] = '}';
         goto Q1;
     }
     else if ((in[token] == 'f') && (STACK[STACK_TOP] == 'f'))
