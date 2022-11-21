@@ -1,3 +1,10 @@
+
+# Lex Parser
+
+
+## Rules
+
+
 p1 = S -> M
 p2 = S -> GM
 p3 = S -> FGM
