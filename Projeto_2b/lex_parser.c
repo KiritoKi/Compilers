@@ -17,6 +17,7 @@ void lex();
 FILE *file_IN;
 char token = '\0';
 int qtd_entries;
+;
 
 main()
 {
