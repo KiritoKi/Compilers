@@ -58,7 +58,6 @@ int S()
         erro(1, 'm | g | f', 'S');
     }
 }
-
 // M → m(){ C; r(E); }
 int M()
 {
