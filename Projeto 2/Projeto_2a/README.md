@@ -9,7 +9,7 @@
 
 p1 = S -> M
 p2 = S -> GM
-p3 = S -> FGM
+p3 = S -> NGM
 p4 = F -> f(){C;r(E);}
 p5 = G -> g(){C;r(E);}
 p6 = M -> m(){C;r(E);}
